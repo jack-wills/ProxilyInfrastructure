@@ -53,6 +53,10 @@ resource "aws_instance" "proxily" {
     }
   }
 }
+resource "aws_eip" "instance_eip" {
+  instance = "${aws_instance.proxily.id}"
+  vpc      = true
+}
 
 resource "aws_iam_instance_profile" "main" {
   name = "instance-profile"
