@@ -12,6 +12,7 @@ resource "aws_instance" "proxily" {
   vpc_security_group_ids = ["${aws_security_group.proxilyEC2SecurityGroup.id}"]
   key_name = "${aws_key_pair.deployment.key_name}"
   iam_instance_profile = "${aws_iam_instance_profile.main.name}"
+  subnet_id = "${element(module.vpc.public_subnets,2)}"
   tags {
     Name = "Proxily"
   }
@@ -89,7 +90,7 @@ resource "aws_security_group" "proxilyEC2SecurityGroup" {
   name = "proxilyEC2SecurityGroup"
 
   description = "Proxily EC2 Security group"
-  vpc_id = "${module.vpc.default_vpc_id}"
+  vpc_id = "${module.vpc.vpc_id}"
 
   # All ports within
   ingress {
