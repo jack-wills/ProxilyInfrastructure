@@ -22,6 +22,16 @@ if [ $# -ne 0 ]; then
         fi
 
         cd ..
+
+        cd reaperLambda
+        printf '\n\nBuilding Reaper Lambda\n\n'
+        mvn clean verify
+        if [ $? -ne 0 ]; then
+            printf '\n\n Reaper Lambda build faild!\n\n'
+            exit -1
+        fi
+
+        cd ..
         #Do other lambda builds
 
         cd ..

@@ -36,7 +36,7 @@ CREATE TABLE users_votes (
     UserID int NOT NULL,
     Vote bool,
     PRIMARY KEY (PostID,UserID),
-    FOREIGN KEY (PostID) REFERENCES posts(PostID),
+    FOREIGN KEY (PostID) REFERENCES posts(PostID) ON DELETE CASCADE,
     FOREIGN KEY (UserID) REFERENCES users(UserID)
 );
 
@@ -48,7 +48,7 @@ CREATE TABLE comments (
     PostID int NOT NULL,
     Timestamp DATETIME NOT NULL,
     PRIMARY KEY (CommentID),
-    FOREIGN KEY (PostID) REFERENCES posts(PostID),
+    FOREIGN KEY (PostID) REFERENCES posts(PostID) ON DELETE CASCADE,
     FOREIGN KEY (UserID) REFERENCES users(UserID)
 );
 
@@ -57,7 +57,7 @@ CREATE TABLE comments_votes (
     UserID int NOT NULL,
     Vote bool,
     PRIMARY KEY (CommentID,UserID),
-    FOREIGN KEY (CommentID) REFERENCES comments(CommentID),
+    FOREIGN KEY (CommentID) REFERENCES comments(CommentID) ON DELETE CASCADE,
     FOREIGN KEY (UserID) REFERENCES users(UserID)
 );
 

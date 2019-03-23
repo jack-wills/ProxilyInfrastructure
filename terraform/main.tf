@@ -9,10 +9,26 @@ data "aws_caller_identity" "current" {}
 resource "aws_s3_bucket" "video_bucket" {
   bucket = "proxily-post-video-${var.aws_region}"
   acl    = "private"
+  lifecycle_rule {
+    id      = "expire"
+    enabled = true
+
+    expiration {
+      days = 7
+    }
+  }
 }
 resource "aws_s3_bucket" "image_bucket" {
   bucket = "proxily-post-image-${var.aws_region}"
   acl    = "private"
+  lifecycle_rule {
+    id      = "expire"
+    enabled = true
+
+    expiration {
+      days = 7
+    }
+  }
 }
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
