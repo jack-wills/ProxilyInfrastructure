@@ -22,10 +22,7 @@ public class FileUploadLambda implements RequestHandler<S3Event, Object> {
             String timestamp = key[1].replace("%3A", ":").replace("+", " ");
             logger.log("UserID = " + userID);
             logger.log("Timestamp = " + timestamp);
-            logger.log("RDS CLient building");
-            logger.log(System.getenv("RDS_ENDPOINT"));
             String url       = "jdbc:mysql://" + System.getenv("RDS_ENDPOINT") + "/Proxily?autoReconnect=true&useSSL=false";
-            logger.log(url);
             String user      = "admin";
             String password  = "password";
             try {
@@ -38,9 +35,7 @@ public class FileUploadLambda implements RequestHandler<S3Event, Object> {
                 logger.log("SQL Exception: " + e.getMessage());
                 logger.log(e.getSQLState());
             }
-
         }
-        logger.log("Success!");
         return null;
     }
 }

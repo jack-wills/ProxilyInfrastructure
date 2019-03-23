@@ -3,7 +3,7 @@ resource "aws_lambda_function" "file_upload_lambda" {
   handler = "org.proxily.lambdas.fileuploadlambda.FileUploadLambda"
   runtime = "java8"
   filename = "../lambdas/fileUploadLambda/target/FileUploadLambda-1.0.jar"
-  memory_size = "1028"
+  memory_size = "1024"
   timeout = 50
   vpc_config {
     subnet_ids = ["${module.vpc.private_subnets}", "${module.vpc.public_subnets}"]

@@ -12,6 +12,16 @@ if [ $# -ne 0 ]; then
         fi
 
         cd ..
+
+        cd sqlStartupLambda
+        printf '\n\nBuilding SQLStartup Lambda\n\n'
+        mvn clean verify
+        if [ $? -ne 0 ]; then
+            printf '\n\n SQLStartup Lambda build faild!\n\n'
+            exit -1
+        fi
+
+        cd ..
         #Do other lambda builds
 
         cd ..
