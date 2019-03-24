@@ -3,6 +3,7 @@ CREATE DATABASE Proxily;
 USE Proxily;
 
 CREATE USER backend IDENTIFIED WITH AWSAuthenticationPlugin AS 'RDS';
+GRANT ALL PRIVILEGES ON Proxily.* TO 'backend'@'%';
 
 CREATE TABLE users (
     UserID int NOT NULL AUTO_INCREMENT,
