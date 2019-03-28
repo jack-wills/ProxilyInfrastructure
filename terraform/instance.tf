@@ -44,7 +44,9 @@ resource "aws_instance" "proxily" {
       "sudo yum remove -y java-1.7.0-openjdk",
       "sudo yum install -y awslogs",
       "sudo mv /tmp/awslogs.conf /etc/awslogs/awslogs.conf",
-      "sudo service awslogs start"
+      "sudo service awslogs start",
+      "sudo modprobe iptable_nat",
+      "iptables -t nat -A PREROUTING -p tcp --dport 443 -j REDIRECT --to-ports 8443"
     ]
     connection {
       type        = "ssh"
@@ -114,6 +116,14 @@ resource "aws_security_group" "proxilyEC2SecurityGroup" {
   ingress {
     from_port = 80
     to_port = 80
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+
+  ingress {
+    from_port = 443
+    to_port = 443
     protocol = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }

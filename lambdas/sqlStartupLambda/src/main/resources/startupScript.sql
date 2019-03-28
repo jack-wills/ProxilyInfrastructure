@@ -21,7 +21,7 @@ INSERT INTO `users` VALUES
 
 CREATE TABLE posts (
     PostID int NOT NULL AUTO_INCREMENT,
-    Media varchar(2047) NOT NULL,
+    Media text NOT NULL,
     UserID int NOT NULL,
     Votes int DEFAULT 0,
     Latitude float NOT NULL,
@@ -29,7 +29,7 @@ CREATE TABLE posts (
     Timestamp timestamp NOT NULL,
     FileUploaded bool NOT NULL,
     PRIMARY KEY (PostID),
-    FOREIGN KEY (UserID) REFERENCES users(UserID)
+    FOREIGN KEY (UserID) REFERENCES users(UserID) ON DELETE CASCADE
 );
 
 CREATE TABLE users_votes (
@@ -38,7 +38,7 @@ CREATE TABLE users_votes (
     Vote bool,
     PRIMARY KEY (PostID,UserID),
     FOREIGN KEY (PostID) REFERENCES posts(PostID) ON DELETE CASCADE,
-    FOREIGN KEY (UserID) REFERENCES users(UserID)
+    FOREIGN KEY (UserID) REFERENCES users(UserID) ON DELETE CASCADE
 );
 
 CREATE TABLE comments (
@@ -50,7 +50,7 @@ CREATE TABLE comments (
     Timestamp DATETIME NOT NULL,
     PRIMARY KEY (CommentID),
     FOREIGN KEY (PostID) REFERENCES posts(PostID) ON DELETE CASCADE,
-    FOREIGN KEY (UserID) REFERENCES users(UserID)
+    FOREIGN KEY (UserID) REFERENCES users(UserID) ON DELETE CASCADE
 );
 
 CREATE TABLE comments_votes (
@@ -59,7 +59,7 @@ CREATE TABLE comments_votes (
     Vote bool,
     PRIMARY KEY (CommentID,UserID),
     FOREIGN KEY (CommentID) REFERENCES comments(CommentID) ON DELETE CASCADE,
-    FOREIGN KEY (UserID) REFERENCES users(UserID)
+    FOREIGN KEY (UserID) REFERENCES users(UserID) ON DELETE CASCADE
 );
 
 CREATE TABLE saved_locations (
@@ -71,3 +71,13 @@ CREATE TABLE saved_locations (
     PRIMARY KEY (SavedLocationID),
     FOREIGN KEY (UserID) REFERENCES users(UserID)
 );
+
+CREATE TABLE reported_posts (
+    ReportID int NOT NULL AUTO_INCREMENT,
+    UserID int NOT NULL,
+    PostID int NOT NULL,
+    PRIMARY KEY (ReportID),
+    FOREIGN KEY (PostID) REFERENCES posts(PostID) ON DELETE CASCADE,
+    FOREIGN KEY (UserID) REFERENCES users(UserID) ON DELETE CASCADE
+);
+

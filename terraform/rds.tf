@@ -63,7 +63,7 @@ resource "aws_iam_policy" "rds_policy" {
             "rds-db:connect"
         ],
         "Resource": [
-            "arn:aws:rds-db:${var.aws_region}:${data.aws_caller_identity.current.account_id}:dbuser:${aws_db_instance.proxilyDB.resource_id}/${aws_db_instance.proxilyDB.username}"
+            "arn:aws:rds-db:${var.aws_region}:${data.aws_caller_identity.current.account_id}:dbuser:${aws_db_instance.proxilyDB.resource_id}/backend"
         ]
     }
   ]
