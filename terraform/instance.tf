@@ -6,60 +6,78 @@ data "aws_ami" "amzn-linux" {
     values = ["amzn-ami-*-x86_64-gp2"]
   }
 }
-resource "aws_instance" "proxily" {
-  ami           = "${data.aws_ami.amzn-linux.id}"
+
+data "template_file" "script" {
+
+  vars {
+    region = "${var.aws_region}"
+    eip = "${aws_eip.instance_eip.id}"
+  }
+  template = <<EOF
+#!/bin/bash
+sudo yum -y update
+sudo yum install -y ruby
+cd /home/ec2-user
+curl -O https://aws-codedeploy-$${region}.s3.amazonaws.com/latest/install
+chmod +x ./install
+sudo ./install auto
+sudo yum install -y java-1.8.0
+sudo yum remove -y java-1.7.0-openjdk
+sudo yum install -y awslogs
+echo "${file("${path.module}/awslogs.conf")}" >> /tmp/awslogs.conf
+sudo mv /tmp/awslogs.conf /etc/awslogs/awslogs.conf
+sudo service awslogs start
+sudo modprobe iptable_nat
+iptables -t nat -A PREROUTING -p tcp --dport 443 -j REDIRECT --to-ports 8443
+aws configure set default.region $${region}
+INSTANCE_ID=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
+aws ec2 associate-address --instance-id $INSTANCE_ID --allocation-id=$${eip}
+  EOF
+
+}
+
+data "template_cloudinit_config" "config" {
+  part {
+    content_type = "text/x-shellscript"
+    content      = "${data.template_file.script.rendered}"
+  }
+}
+
+resource "aws_launch_template" "proxily" {
+  image_id = "${data.aws_ami.amzn-linux.id}"
   instance_type = "t2.micro"
   vpc_security_group_ids = ["${aws_security_group.proxilyEC2SecurityGroup.id}"]
   key_name = "${aws_key_pair.deployment.key_name}"
-  iam_instance_profile = "${aws_iam_instance_profile.main.name}"
-  subnet_id = "${element(module.vpc.public_subnets,2)}"
-  tags {
-    Name = "Proxily"
+  iam_instance_profile {
+    name = "${aws_iam_instance_profile.main.name}"
   }
+  tag_specifications {
+    resource_type = "instance"
 
-  provisioner "file" {
-    source      = "./install_codedeploy_agent.sh"
-    destination = "/tmp/install_codedeploy_agent.sh"
-    connection {
-      type        = "ssh"
-      user        = "ec2-user"
-      private_key = "${file(var.private_key_path)}"
+    tags = {
+      Name = "Proxily"
     }
   }
 
-  provisioner "file" {
-    source      = "awslogs.conf"
-    destination = "/tmp/awslogs.conf"
-    connection {
-      type        = "ssh"
-      user        = "ec2-user"
-      private_key = "${file(var.private_key_path)}"
-    }
-  }
-  provisioner "remote-exec" {
-    inline = [
-      "chmod +x /tmp/install_codedeploy_agent.sh",
-      "/tmp/install_codedeploy_agent.sh ${var.aws_region}",
-      "sudo yum install -y java-1.8.0",
-      "sudo yum remove -y java-1.7.0-openjdk",
-      "sudo yum install -y awslogs",
-      "sudo mv /tmp/awslogs.conf /etc/awslogs/awslogs.conf",
-      "sudo service awslogs start",
-      "sudo modprobe iptable_nat",
-      "iptables -t nat -A PREROUTING -p tcp --dport 443 -j REDIRECT --to-ports 8443"
-    ]
-    connection {
-      type        = "ssh"
-      user        = "ec2-user"
-      private_key = "${file(var.private_key_path)}"
-    }
+  user_data = "${base64encode(data.template_cloudinit_config.config.rendered)}"
+}
+
+resource "aws_autoscaling_group" "proxily" {
+  availability_zones = ["us-east-1c"]
+  desired_capacity   = 1
+  max_size           = 1
+  min_size           = 1
+  vpc_zone_identifier = ["${element(module.vpc.public_subnets,2)}"]
+
+  launch_template {
+    id      = "${aws_launch_template.proxily.id}"
+    version = "$Latest"
   }
 }
+
 resource "aws_eip" "instance_eip" {
-  instance = "${aws_instance.proxily.id}"
   vpc      = true
 }
-
 resource "aws_iam_instance_profile" "main" {
   name = "instance-profile"
   role = "${aws_iam_role.instance_profile.name}"
@@ -86,6 +104,31 @@ resource "aws_iam_role" "instance_profile" {
   ]
 }
 EOF
+}
+
+resource "aws_iam_policy" "instance_policy" {
+  name = "instance_policy"
+  path = "/"
+
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [
+        "ec2:AssociateAddress"
+      ],
+      "Resource": "*",
+      "Effect": "Allow"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "instance_policy" {
+  role = "${aws_iam_role.instance_profile.name}"
+  policy_arn = "${aws_iam_policy.instance_policy.arn}"
 }
 
 resource "aws_key_pair" "deployment" {

@@ -14,6 +14,8 @@ resource "aws_codedeploy_deployment_group" "proxily" {
     value = "Proxily"
   }
 
+  autoscaling_groups    = ["${aws_autoscaling_group.proxily.id}"]
+  
   auto_rollback_configuration {
     enabled = true
     events  = ["DEPLOYMENT_FAILURE"]
