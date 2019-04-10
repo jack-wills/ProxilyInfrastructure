@@ -30,6 +30,10 @@ resource "aws_s3_bucket" "image_bucket" {
     }
   }
 }
+resource "aws_s3_bucket" "image_bucket" {
+  bucket = "proxily-profile-pictures-${var.aws_region}"
+  acl    = "public-read"
+}
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
 
