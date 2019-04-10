@@ -81,3 +81,11 @@ CREATE TABLE reported_posts (
     FOREIGN KEY (UserID) REFERENCES users(UserID) ON DELETE CASCADE
 );
 
+CREATE TABLE oauths (
+    UserID int NOT NULL,
+    ServiceUserID bigint NOT NULL,
+    Provider varchar(30) NOT NULL,
+    PRIMARY KEY (UserID),
+    FOREIGN KEY (UserID) REFERENCES users(UserID) ON DELETE CASCADE
+);
+
