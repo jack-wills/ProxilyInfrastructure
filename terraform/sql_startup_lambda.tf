@@ -7,14 +7,15 @@ resource "aws_lambda_function" "sql_startup_lambda" {
   timeout = 50
   vpc_config {
     subnet_ids = ["${module.vpc.private_subnets}", "${module.vpc.public_subnets}"]
-    security_group_ids = ["${aws_security_group.proxilyDBSecurityGroup.id}"]
+    security_group_ids = ["${aws_security_group.proxilyEC2SecurityGroup.id}"]
   }
   source_code_hash = "${filebase64sha256("../lambdas/sqlStartupLambda/target/SQLStartupLambda-1.0.jar")}"
   role = "${aws_iam_role.sql_startup_exec_role.arn}"
 
   environment {
     variables = {
-      RDS_ENDPOINT = "${aws_db_instance.proxilyDB.endpoint}"
+      RDS_ENDPOINT = "${aws_db_instance.proxilyDB.endpoint}",
+      RDS_PASSWORD = "Test123"
     }
   }
 }
@@ -48,6 +49,10 @@ resource "aws_iam_role_policy_attachment" "sql_startup_exec_role_vpc" {
 resource "aws_iam_role_policy_attachment" "sql_startup_exec_role_rds" {
   role       = "${aws_iam_role.sql_startup_exec_role.name}"
   policy_arn = "arn:aws:iam::aws:policy/AmazonRDSReadOnlyAccess"
+}
+resource "aws_iam_role_policy_attachment" "sql_startup_exec_role_ssm" {
+  role       = "${aws_iam_role.sql_startup_exec_role.name}"
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMReadOnlyAccess"
 }
 
 ## SNS subscriptions

@@ -31,7 +31,6 @@ public class SQLStartupLambda implements RequestHandler<SNSEvent, Object> {
             ClassLoader classLoader = getClass().getClassLoader();
 
             File cityFile = new File(classLoader.getResource("startupScript.sql").getFile());
-            logger.log("url = ");
             BufferedReader in = new BufferedReader(new FileReader(cityFile));
             String str;
             StringBuffer sb = new StringBuffer();
@@ -47,6 +46,8 @@ public class SQLStartupLambda implements RequestHandler<SNSEvent, Object> {
                 logger.log(cmd);
                 stmt.addBatch(cmd);
             }
+            stmt.addBatch("CREATE USER backend IDENTIFIED BY " + System.getenv("RDS_PASSWORD"));
+            stmt.addBatch("GRANT ALL PRIVILEGES ON Proxily.* TO 'backend'@'%'");
             stmt.executeBatch();
             conn.close();
         } catch (SQLException e) {

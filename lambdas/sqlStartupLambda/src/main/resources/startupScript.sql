@@ -2,8 +2,8 @@ DROP DATABASE IF EXISTS Proxily;
 CREATE DATABASE Proxily;
 USE Proxily;
 
-CREATE USER backend IDENTIFIED WITH AWSAuthenticationPlugin AS 'RDS';
-GRANT ALL PRIVILEGES ON Proxily.* TO 'backend'@'%';
+CREATE USER backend_iam IDENTIFIED WITH AWSAuthenticationPlugin AS 'RDS';
+GRANT ALL PRIVILEGES ON Proxily.* TO 'backend_iam'@'%';
 
 CREATE TABLE users (
     UserID int NOT NULL AUTO_INCREMENT,
@@ -69,7 +69,7 @@ CREATE TABLE saved_locations (
     Latitude float NOT NULL,
     Longitude float NOT NULL,
     PRIMARY KEY (SavedLocationID),
-    FOREIGN KEY (UserID) REFERENCES users(UserID)
+    FOREIGN KEY (UserID) REFERENCES users(UserID) ON DELETE CASCADE
 );
 
 CREATE TABLE reported_posts (
