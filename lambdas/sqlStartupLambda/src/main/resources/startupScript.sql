@@ -1,4 +1,6 @@
 DROP DATABASE IF EXISTS Proxily;
+DROP USER IF EXISTS 'backend'@'%';
+DROP USER IF EXISTS 'backend_iam'@'%';
 CREATE DATABASE Proxily;
 USE Proxily;
 

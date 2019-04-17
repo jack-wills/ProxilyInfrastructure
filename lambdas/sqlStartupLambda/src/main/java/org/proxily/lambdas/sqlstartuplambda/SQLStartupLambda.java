@@ -46,7 +46,7 @@ public class SQLStartupLambda implements RequestHandler<SNSEvent, Object> {
                 logger.log(cmd);
                 stmt.addBatch(cmd);
             }
-            stmt.addBatch("CREATE USER backend IDENTIFIED BY " + System.getenv("RDS_PASSWORD"));
+            stmt.addBatch("CREATE USER backend IDENTIFIED BY '" + System.getenv("RDS_PASSWORD") + "'");
             stmt.addBatch("GRANT ALL PRIVILEGES ON Proxily.* TO 'backend'@'%'");
             stmt.executeBatch();
             conn.close();
